@@ -1,12 +1,11 @@
 'use strict';
 
 angular
-    .module('asb.directives.onFinishInput', [])
+    .module('asb.directives.onfinishinput', [])
     .directive('asbOnFinishInput', function ($timeout, $parse) {
         return {
             restrict: 'A',
             compile: function (element, attrs) {
-                var fn = $parse(attrs.asbOnFinishInput());
                 var typingDelay = 500;
                 var timeoutFn = null;
 
@@ -21,7 +20,7 @@ angular
 
                     timeoutFn = $timeout(function () {
                         scope.$apply(function () {
-                            fn(scope, {$event: event});
+                            scope.$eval(attrs.asbOnFinishInput());
                         });
                     }, typingDelay);
                 };
