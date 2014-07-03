@@ -5,8 +5,8 @@ describe('filter: asbTextOrDefault', function () {
 
     beforeEach(module('asb.filters.textordefault'));
 
-    beforeEach(inject(function (_$filter_) {
-        asbTextOrDefault = _$filter_('asbTextOrDefault');
+    beforeEach(inject(function (_asbTextOrDefaultFilter_) {
+        asbTextOrDefault = _asbTextOrDefaultFilter_;
     }));
 
     it("should return '-'", function () {
