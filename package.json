@@ -1,0 +1,35 @@
+{
+    "name": "asb-components",
+    "version": "0.0.1",
+    "description": "custom components for AngularJS",
+    "main": "index.js",
+    "scripts": {
+        "test": "./node_modules/.bin/karma start --single-run --browsers PhantomJS"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://alejandroSuch@github.com/alejandroSuch/asb-components.git"
+    },
+    "keywords": [
+        "javascript",
+        "angularjs",
+        "mobile"
+    ],
+    "author": "Alejandro Such",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/alejandroSuch/asb-components/issues"
+    },
+    "homepage": "https://github.com/alejandroSuch/asb-components",
+    "devDependencies": {
+        "angular": "^1.2.19",
+        "angular-mocks": "^1.2.18",
+        "angular-ui-router": "^0.2.10",
+        "grunt": "^0.4.5",
+        "karma": "^0.12.16",
+        "karma-chrome-launcher": "^0.1.4",
+        "karma-html-reporter": "^0.2.3",
+        "karma-jasmine": "^0.2.2",
+        "topcoat": "^0.7.5"
+    }
+}
