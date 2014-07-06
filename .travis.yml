@@ -6,4 +6,4 @@ before_install:
   - 'npm install grunt'
   - 'npm install karma'
   - 'npm install karma-phantomjs-launcher'
-  - 'npm install karma-cli'
+  - 'npm install -g karma-cli'
