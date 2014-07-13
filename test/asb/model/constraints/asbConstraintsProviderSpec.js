@@ -184,14 +184,44 @@ describe('provider: asbConstraintsProvider', function () {
         expect(testFn4).toThrow(throwErr);
         expect(testFn5).toThrow(throwErr);
 
-        expect(maxConstraint(1,4)).toBe(true);
-        expect(maxConstraint(4,4)).toBe(true);
-        expect(maxConstraint(5,4)).toBe(false);
+        expect(maxConstraint(1, 4)).toBe(true);
+        expect(maxConstraint(4, 4)).toBe(true);
+        expect(maxConstraint(5, 4)).toBe(false);
     });
 
-    it('tests the maxSize constraint', function(){
+    it('tests the maxSize constraint', function () {
         var maxSizeConstraint = theProvider.$get().maxSize;
-        var throwErr = 'MinSize constraint only applies to Arrays and Strings';
+        var throwErr = 'MaxSize constraint only applies to Arrays and Strings';
+        var throwErr2 = 'Argument maxSize should be a number';
+
+        var testFn = function () {
+            maxSizeConstraint(undefinedVar, '');
+        };
+
+        var testFn2 = function () {
+            maxSizeConstraint(undefinedVar, 4);
+        };
+
+        var testFn3 = function () {
+            maxSizeConstraint(null, 4);
+        };
+
+        var testFn5 = function () {
+            maxSizeConstraint({}, 4);
+        };
+
+        expect(testFn).toThrow(throwErr2);
+        expect(testFn2).toThrow(throwErr);
+        expect(testFn3).toThrow(throwErr);
+        expect(testFn5).toThrow(throwErr);
+
+        expect(maxSizeConstraint('hello', 4)).toBe(false);
+        expect(maxSizeConstraint('hello', 5)).toBe(true);
+        expect(maxSizeConstraint('hello', 6)).toBe(true);
+
+        expect(maxSizeConstraint([1, 2, 3, 4, 5], 4)).toBe(false);
+        expect(maxSizeConstraint([1, 2, 3, 4, 5], 5)).toBe(true);
+        expect(maxSizeConstraint([1, 2, 3, 4, 5], 6)).toBe(true);
     });
 
     it('tests the min constraint', function () {
@@ -224,12 +254,120 @@ describe('provider: asbConstraintsProvider', function () {
         expect(testFn4).toThrow(throwErr);
         expect(testFn5).toThrow(throwErr);
 
-        expect(minConstraint(1,4)).toBe(false);
-        expect(minConstraint(4,4)).toBe(true);
-        expect(minConstraint(5,4)).toBe(true);
+        expect(minConstraint(1, 4)).toBe(false);
+        expect(minConstraint(4, 4)).toBe(true);
+        expect(minConstraint(5, 4)).toBe(true);
     });
 
+    it('tests the minSize constraint', function () {
+        var minSizeConstraint = theProvider.$get().minSize;
+        var throwErr = 'MinSize constraint only applies to Arrays and Strings';
+        var throwErr2 = 'Argument minSize should be a number';
 
+        var testFn = function () {
+            minSizeConstraint(undefinedVar, '');
+        };
+
+        var testFn2 = function () {
+            minSizeConstraint(undefinedVar, 4);
+        };
+
+        var testFn3 = function () {
+            minSizeConstraint(null, 4);
+        };
+
+        var testFn5 = function () {
+            minSizeConstraint({}, 4);
+        };
+
+        expect(testFn).toThrow(throwErr2);
+        expect(testFn2).toThrow(throwErr);
+        expect(testFn3).toThrow(throwErr);
+        expect(testFn5).toThrow(throwErr);
+
+        expect(minSizeConstraint('hello', 4)).toBe(true);
+        expect(minSizeConstraint('hello', 5)).toBe(true);
+        expect(minSizeConstraint('hello', 6)).toBe(false);
+
+        expect(minSizeConstraint([1, 2, 3, 4, 5], 4)).toBe(true);
+        expect(minSizeConstraint([1, 2, 3, 4, 5], 5)).toBe(true);
+        expect(minSizeConstraint([1, 2, 3, 4, 5], 6)).toBe(false);
+    });
+
+    it('tests the notEqual constraint', function(){
+        var notEqualConstraint = theProvider.$get().notEqual;
+
+        var testFn = function() {
+            notEqualConstraint(1,1);
+        };
+
+        expect(testFn).toThrow('NotEqual constraint: Not implemented yet');
+    });
+
+    it('tests the nullable constraint', function(){
+        var nullableConstraint = theProvider.$get().nullable;
+
+        expect(nullableConstraint('', true)).toBe(true);
+        expect(nullableConstraint('', false)).toBe(true);
+
+        expect(nullableConstraint(null, true)).toBe(true);
+        expect(nullableConstraint(null, false)).toBe(false);
+
+        expect(nullableConstraint(undefinedVar, true)).toBe(true);
+        expect(nullableConstraint(undefinedVar, false)).toBe(false);
+    });
+
+    it('tests the numeric constraint', function(){
+        var numericConstraint = theProvider.$get().numeric;
+        var throwErr = 'Numeric constraint expects two arguments';
+
+        var testFn = function(){
+            numericConstraint('a');
+        };
+
+        expect(testFn).toThrow(throwErr);
+
+        expect(numericConstraint(5, true)).toBe(true);
+        expect(numericConstraint(5, false)).toBe(true);
+
+        expect(numericConstraint(null, true)).toBe(false);
+        expect(numericConstraint(null, false)).toBe(true);
+
+        expect(numericConstraint(undefinedVar, true)).toBe(false);
+        expect(numericConstraint(undefinedVar, false)).toBe(true);
+
+        expect(numericConstraint('5', true)).toBe(false);
+        expect(numericConstraint('5', false)).toBe(true);
+
+        expect(numericConstraint([], true)).toBe(false);
+        expect(numericConstraint([], false)).toBe(true);
+
+        expect(numericConstraint({}, true)).toBe(false);
+        expect(numericConstraint({}, false)).toBe(true);
+    });
+
+    it('tests the range constraint', function(){
+        var rangeConstraint = theProvider.$get().range;
+        var throwErr = 'Range constraint expects three arguments';
+        var throwErr2 = 'All three values must be numbers';
+
+        var testFn = function(){
+            rangeConstraint('a', '1');
+        };
+
+        var testFn2 = function(){
+            rangeConstraint('a', '1', 10);
+        };
+
+        expect(testFn).toThrow(throwErr);
+        expect(testFn2).toThrow(throwErr2);
+
+        expect(rangeConstraint(5, 0, 10)).toBe(true);
+        expect(rangeConstraint(0, 0, 10)).toBe(true);
+        expect(rangeConstraint(10, 0, 10)).toBe(true);
+        expect(rangeConstraint(-1, 0, 10)).toBe(false);
+        expect(rangeConstraint(11, 0, 10)).toBe(false);
+    });
 
 
 });
