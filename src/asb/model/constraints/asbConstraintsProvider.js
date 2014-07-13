@@ -3,7 +3,7 @@
 'use strict';
 (function () {
     angular
-        .module('asb.model.constraints')
+        .module('asb.model.constraints', [])
         .provider('asbConstraints', function () {
             var instance = {
                 /**
@@ -34,6 +34,7 @@
                  */
                 creditCard: function (value, creditCard) {
                     throw 'CreditCard constraint: Not implemented yet';
+
                     return false;
                 },
 
@@ -60,7 +61,7 @@
                  * @returns {boolean}
                  */
                 inList: function (value, array) {
-                    if (!(value instanceof Array)) {
+                    if (!(array instanceof Array)) {
                         throw 'InList constraint only applies to Arrays';
                     }
 
@@ -90,6 +91,10 @@
                  * @returns {boolean}
                  */
                 max: function (value, max) {
+                    if(typeof value !== 'number' && !(value instanceof Number)) {
+                        throw 'Max constraint only applies to numbers';
+                    }
+
                     return value <= max;
                 },
 
@@ -114,6 +119,10 @@
                  * @returns {boolean}
                  */
                 min: function (value, min) {
+                    if(typeof value !== 'number' && !(value instanceof Number)) {
+                        throw 'Min constraint only applies to numbers';
+                    }
+
                     return value >= min;
                 },
 
