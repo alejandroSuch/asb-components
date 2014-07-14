@@ -28,6 +28,7 @@
     "grunt": "^0.4.5",
     "karma": "^0.12.16",
     "karma-chrome-launcher": "^0.1.4",
+    "karma-coverage": "^0.2.4",
     "karma-html-reporter": "^0.2.3",
     "karma-jasmine": "^0.2.2",
     "topcoat": "^0.7.5"
