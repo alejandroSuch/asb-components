@@ -30,4 +30,23 @@ describe('filter: asbTextOrDefault', function () {
         expect(asbTextOrDefault(helloWithSpaces, 'N/D')).toBe(helloWithSpaces);
         expect(asbTextOrDefault(helloWithSpaces)).toBe(helloWithSpaces);
     });
+
+    it("should return the same value (non-string)", function () {
+        var hello = 1;
+        var undefinedVar;
+
+        expect(asbTextOrDefault(hello, 'N/D')).toBe('1');
+        expect(asbTextOrDefault(hello)).toBe('1');
+
+        hello = [];
+        expect(asbTextOrDefault(hello, 'N/D')).toBe('N/D');
+        expect(asbTextOrDefault(hello)).toBe('-');
+
+        hello = {};
+        expect(asbTextOrDefault(hello, 'N/D')).toBe('N/D');
+        expect(asbTextOrDefault(hello)).toBe('-');
+
+        expect(asbTextOrDefault(undefinedVar, 'N/D')).toBe('N/D');
+        expect(asbTextOrDefault(undefinedVar)).toBe('-');
+    });
 });

@@ -8,7 +8,7 @@ angular.module('asb.filters.textordefault', [])
 			}
 
 			if(!angular.isString()) {
-				if(input.toString) {
+				if(input.toString && input.toString() !== '[object Object]') {
 					input = input.toString();
 				} else {
 					return defaultValue;
