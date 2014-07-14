@@ -20,8 +20,9 @@
             };
 
             var createEntity = function (name, attributes) {
+                var result;
                 eval(
-                        'var result = (' +
+                        'result = (' +
                         'function(){ ' +
                         'var initialData = attributes;' +
                         '__extends(' + name + ', Entity);' +
@@ -82,10 +83,7 @@
                 if (isEmptyObject(attributes)) {
                     throw 'You must provide some initial data';
                 }
-                ;
 
-                this._new = true;
-                this._dirty = false;
                 this._valid = true;
                 this._attributes = attributes;
                 this._values = {};
@@ -97,8 +95,11 @@
                         throw this._attributes[i].type + ' is not a valid type';
                     }
 
-                    this[value] = attributes[i].default ? attributes[i].default : null;
+                    this[i] = attributes[i].default ? attributes[i].default : null;
                 }
+
+                this._new = true;
+                this._dirty = false;
             };
 
             Entity.prototype.validate = function (attribute) {
