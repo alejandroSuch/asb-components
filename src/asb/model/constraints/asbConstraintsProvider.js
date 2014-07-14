@@ -228,6 +228,10 @@
                     throw 'Size constraint expects three arguments';
                 }
 
+                if (!instance.numeric(start, true) || !instance.numeric(end, true)) {
+                    throw 'Start and end values must be numbers';
+                }
+
                 if (value instanceof Array || value instanceof String || typeof value === 'string') {
                     return value.length >= Math.min(start, end) && value.length <= Math.max(start, end);
                 }
@@ -254,6 +258,18 @@
              * @returns {boolean}
              */
             instance.url = function (value, url) {
+                if(arguments.length !== 2) {
+                    throw 'Url constraint: expected 2 arguments';
+                }
+
+                if(typeof value !== 'string' && !(value instanceof String)) {
+                    throw 'Url constraint: value expected to be a string';
+                }
+
+                if(typeof url !== 'boolean' && !(url instanceof Boolean)) {
+                    throw 'Url constraint: url expected to be a boolean';
+                }
+
                 var urlRegex = /^(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?$/;
 
                 if (url) {
@@ -269,7 +285,7 @@
             }
 
             this.addConstraint = function (constraintName, fn) {
-                if (defaultConstraints.indexOf(constraintName) !== 1) {
+                if (defaultConstraints.indexOf(constraintName) !== -1) {
                     throw 'Cannot override a default constraint';
                 }
 

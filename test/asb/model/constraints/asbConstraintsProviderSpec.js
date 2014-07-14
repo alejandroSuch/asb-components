@@ -294,17 +294,17 @@ describe('provider: asbConstraintsProvider', function () {
         expect(minSizeConstraint([1, 2, 3, 4, 5], 6)).toBe(false);
     });
 
-    it('tests the notEqual constraint', function(){
+    it('tests the notEqual constraint', function () {
         var notEqualConstraint = theProvider.$get().notEqual;
 
-        var testFn = function() {
-            notEqualConstraint(1,1);
+        var testFn = function () {
+            notEqualConstraint(1, 1);
         };
 
         expect(testFn).toThrow('NotEqual constraint: Not implemented yet');
     });
 
-    it('tests the nullable constraint', function(){
+    it('tests the nullable constraint', function () {
         var nullableConstraint = theProvider.$get().nullable;
 
         expect(nullableConstraint('', true)).toBe(true);
@@ -317,11 +317,11 @@ describe('provider: asbConstraintsProvider', function () {
         expect(nullableConstraint(undefinedVar, false)).toBe(false);
     });
 
-    it('tests the numeric constraint', function(){
+    it('tests the numeric constraint', function () {
         var numericConstraint = theProvider.$get().numeric;
         var throwErr = 'Numeric constraint expects two arguments';
 
-        var testFn = function(){
+        var testFn = function () {
             numericConstraint('a');
         };
 
@@ -346,16 +346,16 @@ describe('provider: asbConstraintsProvider', function () {
         expect(numericConstraint({}, false)).toBe(true);
     });
 
-    it('tests the range constraint', function(){
+    it('tests the range constraint', function () {
         var rangeConstraint = theProvider.$get().range;
         var throwErr = 'Range constraint expects three arguments';
         var throwErr2 = 'All three values must be numbers';
 
-        var testFn = function(){
+        var testFn = function () {
             rangeConstraint('a', '1');
         };
 
-        var testFn2 = function(){
+        var testFn2 = function () {
             rangeConstraint('a', '1', 10);
         };
 
@@ -367,6 +367,111 @@ describe('provider: asbConstraintsProvider', function () {
         expect(rangeConstraint(10, 0, 10)).toBe(true);
         expect(rangeConstraint(-1, 0, 10)).toBe(false);
         expect(rangeConstraint(11, 0, 10)).toBe(false);
+    });
+
+    it('tests the size constraint', function () {
+        var sizeConstraint = theProvider.$get().size;
+        var throwErr = 'Size constraint expects three arguments';
+        var throwErr2 = 'Size constraint only applies to Arrays and Strings';
+        var throwErr3 = 'Start and end values must be numbers';
+
+        var testFn = function () {
+            sizeConstraint('a', '1');
+        };
+
+        var testFn2 = function () {
+            sizeConstraint({}, 1, 10);
+        };
+
+        var testFn3 = function () {
+            sizeConstraint('a', '1', 10);
+        };
+
+        expect(testFn).toThrow(throwErr);
+        expect(testFn2).toThrow(throwErr2);
+        expect(testFn3).toThrow(throwErr3);
+
+        expect(sizeConstraint("hello", 0, 5)).toBe(true);
+        expect(sizeConstraint("", 0, 5)).toBe(true);
+        expect(sizeConstraint("hi", 0, 5)).toBe(true);
+        expect(sizeConstraint("hello world", 0, 5)).toBe(false);
+
+        expect(sizeConstraint([1, 2, 3, 4, 5], 0, 5)).toBe(true);
+        expect(sizeConstraint([], 0, 5)).toBe(true);
+        expect(sizeConstraint([1, 2], 0, 5)).toBe(true);
+        expect(sizeConstraint([1, 2, 3, 4, 5, 6, 7, 8, 9], 0, 5)).toBe(false);
+    });
+
+    it('tests the unique constraint', function () {
+        var uniqueConstraint = theProvider.$get().unique;
+
+        var throwErr = 'Unique constraint: not implemented yet';
+
+        var testFn = function () {
+            uniqueConstraint('a', true);
+        };
+
+        expect(testFn).toThrow(throwErr);
+    });
+
+    it('tests the url constraint', function () {
+        var urlConstraint = theProvider.$get().url;
+
+        var throwErr = 'Url constraint: expected 2 arguments';
+        var throwErr2 = 'Url constraint: value expected to be a string';
+        var throwErr3 = 'Url constraint: url expected to be a boolean';
+
+        var testFn = function () {
+            urlConstraint(1);
+        };
+
+        var testFn2 = function () {
+            urlConstraint(1, true);
+        };
+
+        var testFn3 = function () {
+            urlConstraint('1', 'true');
+        };
+
+        expect(testFn).toThrow(throwErr);
+        expect(testFn2).toThrow(throwErr2);
+        expect(testFn3).toThrow(throwErr3);
+
+        expect(urlConstraint('www.ua.es', false)).toBe(true);
+        expect(urlConstraint('asdf', true)).toBe(false);
+        expect(urlConstraint('www.ua.es', true)).toBe(false);
+        expect(urlConstraint('http://www.ua.es', true)).toBe(true);
+    });
+
+    it('tests a custom constraint', function () {
+        theProvider.addConstraint('customConstraint', function (value, needsToBeFive) {
+            if (needsToBeFive) {
+                return value === 5;
+            }
+
+            return true;
+        });
+
+        var customConstraint = theProvider.$get().customConstraint;
+
+        expect(customConstraint(5, true)).toBe(true);
+        expect(customConstraint(4, false)).toBe(true);
+        expect(customConstraint(54, true)).toBe(false);
+    });
+
+    it('should fail trying to override an existing constraint', function () {
+        var throwErr = 'Cannot override a default constraint';
+        var testFn = function() {
+            theProvider.addConstraint('url', function (value, needsToBeFive) {
+                if (needsToBeFive) {
+                    return value === 5;
+                }
+
+                return true;
+            });
+        };
+
+        expect(testFn).toThrow(throwErr);
     });
 
 
