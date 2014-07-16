@@ -7,3 +7,14 @@ before_install:
   - 'npm install karma'
   - 'npm install karma-phantomjs-launcher'
   - 'npm install -g karma-cli'
+
+deploy:
+  provider: releases
+  api-key: "19c8124b6d5ac94bdb86ad8a869ec3cae7099cff"
+  file:
+    - 'asb-components.js'
+    - 'asb-components.min.js'
+  skip_cleanup: true
+  on:
+    tags: true
+    all_branches: true
