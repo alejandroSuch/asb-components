@@ -5,25 +5,25 @@ angular
     .directive('asbOnFinishInput', function ($timeout, $parse) {
         return {
             restrict: 'A',
-            compile: function (element, attrs) {
-                var typingDelay = 500;
-                var timeoutFn = null;
+            link: function (scope, element, attrs) {
+                var typingTimeout;
 
-                if (attrs.asbTypingTimeout || angular.isNumber(attrs.asbTypingDelay)) {
-                    typingDelay = parseInt(attrs.asbTypingDelay);
-                }
-
-                return function (scope, element, attrs) {
-                    if (timeoutFn) {
-                        $timeout.cancel(timeoutFn);
+                element.on('keyup', function () {
+                    if (typingTimeout) {
+                        $timeout.cancel(typingTimeout);
                     }
 
-                    timeoutFn = $timeout(function () {
-                        scope.$apply(function () {
-                            scope.$eval(attrs.asbOnFinishInput());
-                        });
-                    }, typingDelay);
-                };
+                    var delay = 500;
+                    /** @namespace attrs.onFinishInputDelay */
+                    if (attrs.onFinishInputDelay || angular.isNumber(attrs.onFinishInputDelay)) {
+                        delay = attrs.onFinishInputDelay;
+                    }
+
+                    typingTimeout = $timeout(function () {
+                        /** @namespace attrs.onFinishInput */
+                        scope.$eval(attrs.onFinishInput);
+                    }, delay);
+                });
             }
-        }
+        };
     });

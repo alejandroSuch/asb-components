@@ -1,31 +1,81 @@
 'use strict';
 
 describe('directive: asbOnFinishInput', function () {
-    var element, scope;
+    var scope, compile, timeout, element;
 
-    beforeEach(module('asb.directives.onfinishinput'));
+    beforeEach(function () {
+        module('agenda');
+        inject(function ($compile, $rootScope, $timeout) {
+            scope = $rootScope;
+            compile = $compile;
+            timeout = $timeout;
 
-    beforeEach(inject(function ($rootScope, $compile, _$sniffer_, _$browser_) {
-        console.log('sniffer', _$sniffer_);
-        console.log('browser_', _$browser_);
-        //return;
-        scope = $rootScope.$new();
-        element = $compile('<input type="text" ng-model="value" asb-on-finish-input="ofi()" />')(scope);
-        //$sniffer = _$sniffer_;
-        //$browser = _$browser_;
+            scope.triggerOnFinishInput = function () {
+                alert(33);
+            };
 
-        element.val('value');
-        console.log(element);
-        //browserTrigger(inputElm, $sniffer.hasEvent('input') ? 'input' : 'change');
-    }));
+            scope.model = { value: null };
 
-    it("contains spec with an expectation", function () {
+            element = angular.element('<input type="text" ng-model="model.value" asb-on-finish-input="triggerOnFinishInput()" />');
+            element = compile(element)(scope);
 
-        //debugger;//!!
-        expect(true).toBe(true)
-        /*console.log(1, expect);
-        console.log(2, expect(true));
-        console.log(3, expect(true).toBe);
-        console.log(4, expect(true).toBe(true));*/
+            spyOn(scope, "triggerOnFinishInput");
+        });
+    });
+
+    it('should not be called', function () {
+        element.val('newValue')
+        timeout.flush(100);
+        expect(scope.triggerOnFinishInput).not.toHaveBeenCalled();
+        timeout.flush(1500);
+        expect(scope.triggerOnFinishInput).not.toHaveBeenCalled();
+    });
+
+    it('shouldnt not be called after 1000ms (default)', function () {
+        element.val('newValue')
+        element.triggerHandler('keyup');
+        expect(scope.triggerOnFinishInput).not.toHaveBeenCalled();
+        timeout.flush(100);
+        expect(scope.triggerOnFinishInput).not.toHaveBeenCalled();
+        timeout.flush(900);
+        expect(scope.triggerOnFinishInput).toHaveBeenCalled();
+    });
+
+    it('shouldnt not be called after 1000ms (default delay)', function () {
+        element.val('newValue')
+        element.triggerHandler('keyup');
+        expect(scope.triggerOnFinishInput).not.toHaveBeenCalled();
+        timeout.flush(100);
+        expect(scope.triggerOnFinishInput).not.toHaveBeenCalled();
+        timeout.flush(900);
+        expect(scope.triggerOnFinishInput).toHaveBeenCalled();
+    });
+
+    it('shouldnt not be called after 1500ms because a retype (default delay)', function () {
+        element.val('newValue')
+        element.triggerHandler('keyup');
+        expect(scope.triggerOnFinishInput).not.toHaveBeenCalled();
+
+        timeout.flush(500);
+        element.val('anotherNewValue')
+        element.triggerHandler('keyup');
+        expect(scope.triggerOnFinishInput).not.toHaveBeenCalled();
+        timeout.flush(500);
+        expect(scope.triggerOnFinishInput).not.toHaveBeenCalled();
+        timeout.flush(500);
+        expect(scope.triggerOnFinishInput).toHaveBeenCalled();
+    });
+
+    it('shouldnt not be called after 200ms (given delay)', function () {
+        element = angular.element('<input type="text" ng-model="model.value" asb-on-finish-input="triggerOnFinishInput()" on-finish-input-delay="200" />');
+        element = compile(element)(scope);
+
+        element.val('newValue')
+        element.triggerHandler('keyup');
+        expect(scope.triggerOnFinishInput).not.toHaveBeenCalled();
+        timeout.flush(100);
+        expect(scope.triggerOnFinishInput).not.toHaveBeenCalled();
+        timeout.flush(100);
+        expect(scope.triggerOnFinishInput).toHaveBeenCalled();
     });
 });
