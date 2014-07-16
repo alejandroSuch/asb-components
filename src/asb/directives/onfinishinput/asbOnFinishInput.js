@@ -1,29 +1,31 @@
-'use strict';
+(function () {
+    'use strict';
 
-angular
-    .module('asb.directives.onfinishinput', [])
-    .directive('asbOnFinishInput', function ($timeout, $parse) {
-        return {
-            restrict: 'A',
-            compile: function (element, attrs) {
-                var typingDelay = 500;
-                var timeoutFn = null;
+    angular
+        .module('asb.directives.onfinishinput', [])
+        .directive('asbOnFinishInput', function ($timeout) {
+            return {
+                restrict: 'A',
+                link: function (scope, element, attrs) {
+                    var typingTimeout;
 
-                if (attrs.asbTypingTimeout || angular.isNumber(attrs.asbTypingDelay)) {
-                    typingDelay = parseInt(attrs.asbTypingDelay);
+                    element.on('keyup', function () {
+                        if (typingTimeout) {
+                            $timeout.cancel(typingTimeout);
+                        }
+
+                        var delay = 1000;
+                        /** @namespace attrs.onFinishInputDelay */
+                        if (attrs.onFinishInputDelay || angular.isNumber(attrs.onFinishInputDelay)) {
+                            delay = attrs.onFinishInputDelay;
+                        }
+
+                        typingTimeout = $timeout(function () {
+                            /** @namespace attrs.asbOnFinishInput */
+                            scope.$eval(attrs.asbOnFinishInput);
+                        }, delay);
+                    });
                 }
-
-                return function (scope, element, attrs) {
-                    if (timeoutFn) {
-                        $timeout.cancel(timeoutFn);
-                    }
-
-                    timeoutFn = $timeout(function () {
-                        scope.$apply(function () {
-                            scope.$eval(attrs.asbOnFinishInput());
-                        });
-                    }, typingDelay);
-                };
-            }
-        }
-    });
+            };
+        });
+})();
