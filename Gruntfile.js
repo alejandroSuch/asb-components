@@ -16,6 +16,11 @@ module.exports = function (grunt) {
         },
 
         jshint: {
+            options: {
+                jshintrc: '.jshintrc',
+                reporter: require('jshint-stylish')
+            },
+
             asbComponents: ['src/**/*.js']
         },
 
