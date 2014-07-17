@@ -4,7 +4,7 @@ describe('directive: asbOnFinishInput', function () {
     var scope, compile, timeout, element;
 
     beforeEach(function () {
-        module('agenda');
+        module('asb.directives.onfinishinput');
         inject(function ($compile, $rootScope, $timeout) {
             scope = $rootScope;
             compile = $compile;
@@ -18,6 +18,7 @@ describe('directive: asbOnFinishInput', function () {
 
             element = angular.element('<input type="text" ng-model="model.value" asb-on-finish-input="triggerOnFinishInput()" />');
             element = compile(element)(scope);
+            scope.$apply();
 
             spyOn(scope, "triggerOnFinishInput");
         });
@@ -37,7 +38,7 @@ describe('directive: asbOnFinishInput', function () {
         expect(scope.triggerOnFinishInput).not.toHaveBeenCalled();
         timeout.flush(100);
         expect(scope.triggerOnFinishInput).not.toHaveBeenCalled();
-        timeout.flush(900);
+        timeout.flush(910);
         expect(scope.triggerOnFinishInput).toHaveBeenCalled();
     });
 

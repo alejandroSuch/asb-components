@@ -42,9 +42,13 @@ describe('service: asbEntity', function () {
         expect(person2.name).toBe('Mark');
 
         expect(person._new).toBe(true);
+        expect(person.isNew()).toBe(true);
         expect(person2._new).toBe(true);
+        expect(person2.isNew()).toBe(true);
 
         expect(person._dirty).toBe(true);
+        expect(person.isDirty()).toBe(true);
         expect(person2._dirty).toBe(true);
+        expect(person2.isDirty()).toBe(true);
     });
 });
