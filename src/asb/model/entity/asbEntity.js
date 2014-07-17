@@ -152,6 +152,11 @@
                     });
 
                     resultEntity.prototype.__defineSetter__(attribute, function (value) {
+                        if(!this._values.hasOwnProperty(attribute)) {
+                            console.log('Unknown property \'' + attribute + '\'')
+                            //throw 'Unknown property \'' + attribute + '\'';
+                        }
+
                         if (this._values[attribute] !== value) {
 
                             this._values[attribute] = {

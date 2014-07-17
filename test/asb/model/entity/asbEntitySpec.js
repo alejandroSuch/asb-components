@@ -51,4 +51,30 @@ describe('service: asbEntity', function () {
         expect(person2._dirty).toBe(true);
         expect(person2.isDirty()).toBe(true);
     });
+
+    it('creates throws an exception because of an unknown property', function () {
+        var Person = asbEntity.extend('Person', {
+            name: {
+                type: 'TEXT',
+                default: null
+            }
+        });
+
+        var person = new Person();
+
+        person.name = 'Johan';
+
+        expect(person.name).toBe('Johan');
+
+        var testFn = function(){
+            person.lastName = 'Cruyff';
+        };
+
+        expect(person.name).toBe('Johan');
+        expect(testFn).toThrow('Unknown property \'Cruyff\'');
+        expect(person._new).toBe(true);
+        expect(person.isNew()).toBe(true);
+        expect(person._dirty).toBe(true);
+        expect(person.isDirty()).toBe(true);
+    });
 });
