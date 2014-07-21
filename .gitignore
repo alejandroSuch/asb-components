@@ -1,3 +1,6 @@
 node_modules/
 .idea/
 npm-debug.log
+asb-components.clean.js
+asb-components.js
+asb-components.min.js
