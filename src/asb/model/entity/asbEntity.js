@@ -1,41 +1,29 @@
-'use strict';
+/** Based on 'Simple JavaScript Inheritance' By John Resig (http://ejohn.org/blog/simple-javascript-inheritance/),
+ * which is also Inspired by base2 and Prototype
+ * MIT Licensed.
+ */
 
-(function () {
-    angular
-        .module('asb.model.entity', ['asb.model.constraints'])
-        .service('asbEntity', ['asbConstraints', function (asbConstraints) {
-            var __extends = function (d, b) {
-                for (var p in b) {
-                    if (b.hasOwnProperty(p)) {
-                        d[p] = b[p];
+angular
+    .module('asb.model.entity', ['asb.model.constraints'])
+    .service('Entity', ['asbConstraints', function (asbConstraints) {
+        (function () {
+            var initializing = false, fnTest = /xyz/.test(function () {
+                xyz;
+            }) ? /\b_super\b/ : /.*/;
+
+            function isEmptyObject(object) {
+                if (!(typeof object === 'object')) {
+                    return true;
+                }
+
+                for (var key in object) {
+                    if (hasOwnProperty.call(object, key)) {
+                        return false;
                     }
                 }
 
-                function __() {
-                    this.constructor = d;
-                }
-
-                __.prototype = b.prototype;
-                d.prototype = new __();
-            };
-
-            var createEntity = function (name, attributes) {
-                var result;
-                eval(
-                        'result = (' +
-                        'function(){ ' +
-                        'var initialData = attributes;' +
-                        '__extends(' + name + ', Entity);' +
-                        'function ' + name + '(){' +
-                        'Entity.call(this, initialData);' +
-                        '};' +
-                        'return ' + name + ';' +
-                        '}' +
-                        ')();'
-                );
-
-                return result;
-            };
+                return true;
+            }
 
             function flattenArray(oArray) {
                 var retVal = [];
@@ -52,23 +40,8 @@
                     }
                 }
                 return retVal;
-            };
-
-            function isEmptyObject(object) {
-                if (!(typeof object === 'object')) {
-                    return true;
-                }
-
-                for (var key in object) {
-                    if (hasOwnProperty.call(object, key)) {
-                        return false;
-                    }
-                }
-
-                return true;
             }
 
-            var reservedWords = ['id'];
 
             var validTypes = {
                 'INT': 'INTEGER',
@@ -79,80 +52,96 @@
                 'TEXT': 'TEXT'
             };
 
-            var Entity = function (attributes) {
-                if (isEmptyObject(attributes)) {
+            // The base Class implementation (does nothing)
+            this.Entity = function () {
+            };
+
+            // Create a new Class that inherits from this class
+            Entity.extend = function (prop) {
+                if (typeof prop === 'undefined' || typeof prop.attributes === 'undefined' || isEmptyObject(prop.attributes)) {
                     throw 'You must provide some initial data';
                 }
 
-                this._valid = true;
-                this._attributes = attributes;
-                this._values = {};
-                this._dirtyValues = {};
+                var _super = this.prototype;
 
-                //TODO: Initialize
-                for (var i in this._attributes) {
-                    if (!validTypes.hasOwnProperty([this._attributes[i].type.toUpperCase()])) {
-                        throw this._attributes[i].type + ' is not a valid type';
-                    }
-
-                    this[i] = attributes[i].default ? attributes[i].default : null;
-                }
-
-                this._new = true;
-                this._dirty = false;
-            };
-
-            Entity.prototype.validate = function (attribute) {
-                if (typeof attribute === 'undefined') {
-                    for (var i in this._attributes) {
-                        this.validate('i');
-                    }
-                }
-
-                if (!this._values.hasOwnProperty(attribute)) {
-                    this._valid = false;
-                    throw 'Property ' + attribute + ' does not exist';
-                }
+                // Instantiate a base class (but only create the instance,
+                // don't run the init constructor)
+                initializing = true;
+                var prototype = new this();
+                initializing = false;
 
 
-            };
+                // Copy the properties over onto the new prototype
+                for (var name in prop) {
+                    if (name !== 'attributes') {
+                        // Check if we're overwriting an existing function
+                        prototype[name] = typeof prop[name] == "function" &&
+                            typeof _super[name] == "function" && fnTest.test(prop[name]) ?
+                            (function (name, fn) {
+                                return function () {
+                                    var tmp = this._super;
 
-            Entity.prototype.isDirty = function () {
-                return this._dirty;
-            };
+                                    // Add a new ._super() method that is the same method
+                                    // but on the super-class
+                                    this._super = _super[name];
 
-            Entity.prototype.isNew = function () {
-                return this._new;
-            };
+                                    // The method only need to be bound temporarily, so we
+                                    // remove it when we're done executing
+                                    var ret = fn.apply(this, arguments);
+                                    this._super = tmp;
 
-            Entity.prototype.isValid = function () {
-                for (var i in this._values) {
-                    if (!this._values[i].valid) {
-                        return false;
+                                    return ret;
+                                };
+                            })(name, prop[name]) : prop[name];
                     }
                 }
 
-                return true;
-            };
-
-            Entity.extend = function (name, attributes) {
-                if (isEmptyObject(attributes)) {
-                    throw 'You must provide a valid non empty object';
+                // The dummy class constructor
+                function Entity() {
+                    // All construction is actually done in the init method
+                    if (!initializing && this.init)
+                        this.init.apply(this, arguments);
                 }
 
-                var resultEntity = createEntity(name, attributes);
+                Entity._attributes = prop.attributes;
 
-                for (var attribute in attributes) {
-                    if (reservedWords.indexOf(attribute) !== -1) {
-                        throw attribute + ' is a reserved word and cannot be used';
+                prototype._values = {};
+                prototype.isValid = function () {
+                    for (var i in this._values) {
+                        if (!this._values[i].valid) {
+                            return false;
+                        }
                     }
 
-                    resultEntity.prototype.__defineGetter__(attribute, function () {
+                    return true;
+                };
+
+
+                prototype._dirtyValues = {};
+                prototype.isDirty = function () {
+                    return isEmptyObject(this.dirtyValues);
+                };
+
+                prototype._new = true;
+                prototype.isNew = function () {
+                    return this._new;
+                };
+
+                for (var attribute in Entity._attributes) {
+                    if (!Entity._attributes[attribute].type) {
+                        throw 'Must provide a type for attribute ' + attribute;
+                    }
+
+                    if (!validTypes.hasOwnProperty(Entity._attributes[attribute].type.toUpperCase())) {
+                        throw Entity._attributes[attribute].type + ' is not a valid type';
+                    }
+
+                    prototype.__defineGetter__(attribute, function () {
                         return this._values[attribute].value;
                     });
 
-                    resultEntity.prototype.__defineSetter__(attribute, function (value) {
-                        if(!this._values.hasOwnProperty(attribute)) {
+                    prototype.__defineSetter__(attribute, function (value) {
+                        if (!Entity._attributes.hasOwnProperty(attribute)) {
                             console.log('Unknown property \'' + attribute + '\'')
                             //throw 'Unknown property \'' + attribute + '\'';
                         }
@@ -165,10 +154,11 @@
                                 validationErorrs: []
                             };
 
-                            var constraints = this._attributes[attribute].constraints;
+                            var constraints = Entity._attributes[attribute].constraints;
 
                             if (!isEmptyObject(constraints)) {
                                 for (var i in constraints) {
+                                    console.log('calling', i);
                                     if (!asbConstraints[i].apply(this, flattenArray([this._values[attribute].value, constraints[i]]))) {
                                         this._values[attribute].valid = false;
                                         //TODO: add default error messages
@@ -182,14 +172,33 @@
                         }
                     });
 
-                    //TODO: AUTO-CREATE VALIDATION DIRECTIVES
+                    prototype[attribute] = Entity._attributes[attribute].default ? Entity._attributes[attribute].default : null;
                 }
 
-                return resultEntity;
+                Entity.prototype.validate = function (attribute) {
+                    if (typeof attribute === 'undefined') {
+                        for (var i in Entity._attributes) {
+                            this.validate(i);
+                        }
+                    }
+
+                    if (!this._values.hasOwnProperty(attribute)) {
+                        throw 'Property ' + attribute + ' does not exist';
+                    }
+                };
+
+                // Populate our constructed prototype object
+                Entity.prototype = prototype;
+
+                // Enforce the constructor to be what we expect
+                Entity.prototype.constructor = Entity;
+
+                // And make this class extendable
+                Entity.extend = arguments.callee;
+
+                return Entity;
             };
+        })();
 
-            return Entity;
-        }]);
-})();
-
-
+        return Entity;
+    }]);
