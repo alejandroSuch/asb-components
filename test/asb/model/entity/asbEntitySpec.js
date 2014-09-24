@@ -9,22 +9,42 @@ describe('service: asbEntity', function () {
     }));
 
     it('creates a new, clean entity', function () {
-        debugger;
-
         //Person = Entity.extend({ attributes: {name:{type:'text', constraints:{ nullable:false}}}});
 
         var Person = Entity.extend('Person', {
-            name: {
-                type: 'TEXT',
-                default: null
+            attributes : {
+                name: {
+                    type: 'TEXT',
+                    default: null,
+                    constraints: {
+                        nullable: false
+                    }
+                }
             }
         });
         console.log('Person', Person);
 
         var person = new Person();
 
-        console.log('person', person);
+        var Person2 = Person.extend('Person', {
+            attributes : {
+                lastName: {
+                    type: 'TEXT',
+                    default: null
+                }
+            }
+        });
 
+        console.log('Person2', Person2);
+
+        var person2 = new Person2();
+
+        console.log('person', person);
+        dump(person);
+        dump(person.attributes);
+        console.log('person2', person2);
+        dump(person2)
+        dump(person2.attributes)
         /*expect(person.name).toBe(null);
         expect(person._new).toBe(true);
         expect(person._dirty).toBe(false);*/
