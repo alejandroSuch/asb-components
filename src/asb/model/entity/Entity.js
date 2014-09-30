@@ -9,7 +9,7 @@
 (function () {
     angular
         .module('asb.model.entity', ['asb.model.constraints', 'asb.model.utils'])
-        .service('Entity', ['asbConstraints', 'UUID', function (asbConstraints, UUID) {
+        .service('Entity', ['asbConstraints', 'UUID', '$log', function (asbConstraints, UUID, $log) {
             (function () {
                 var initializing = false, fnTest = /xyz/.test(function () {
                     xyz;
@@ -41,7 +41,7 @@
                     initializing = false;
 
                     // Copy the properties over onto the new prototype
-                    if(!!prop) {
+                    if (!!prop) {
                         for (var name in prop) {
                             if (['attributes', 'equals'].indexOf(name) !== -1) {
                                 continue;
@@ -92,10 +92,10 @@
                             return this._dirtyValues.length !== 0;
                         };
 
-                        prototype.isValid = function(attributeName) {
-                            if(!attributeName) {
-                                for(var it in this._values) {
-                                    if(!this._values[it].valid) {
+                        prototype.isValid = function (attributeName) {
+                            if (!attributeName) {
+                                for (var it in this._values) {
+                                    if (!this._values[it].valid) {
                                         return false;
                                     }
                                 }
@@ -110,16 +110,16 @@
                         var metaCopy = prototype._meta;
                         prototype._meta = {};
 
-                        for(var metaAttr in metaCopy) {
+                        for (var metaAttr in metaCopy) {
                             prototype._meta[metaAttr] = metaCopy[metaAttr];
                         }
                     }
 
-                    prototype.__defineGetter__('entityName', function(){
+                    prototype.__defineGetter__('entityName', function () {
                         return entityName;
                     });
 
-                    prototype.__defineSetter__('entityName', function(value){
+                    prototype.__defineSetter__('entityName', function (value) {
                         throw new Error('Read-only property');
                     });
 
@@ -136,25 +136,20 @@
                             prototype._meta[attributeName] = prop.attributes[attributeName]; //COPY ATTRIBUTE TO META
 
                             prototype.__defineGetter__(attributeName, function () { //GENERATE GETTER
-                                debugger
                                 return this._values[attributeName].value;
                             });
 
                             prototype.__defineSetter__(attributeName, function (value) { //GENERATE SETTER
-                                if (this._values[attributeName].value === value) {
-                                    return;
-                                }
-
-                                if (this._dirtyValues.indexOf(attributeName) === -1) {
+                                if (this._values[attributeName].value !== value && this._dirtyValues.indexOf(attributeName) === -1) {
                                     this._dirtyValues.push(attributeName);
                                 }
 
                                 var isValid = true;
                                 var validationErrors = {};
 
-                                if(!!prop.attributes[attributeName].constraints) {
-                                    for(var constraint in prop.attributes[attributeName].constraints) {
-                                        if(!(prop.attributes[attributeName].constraints[constraint] instanceof Array)){
+                                if (!!prop.attributes[attributeName].constraints) {
+                                    for (var constraint in prop.attributes[attributeName].constraints) {
+                                        if (!(prop.attributes[attributeName].constraints[constraint] instanceof Array)) {
                                             args = [prop.attributes[attributeName].constraints[constraint]]
                                         } else {
                                             args = prop.attributes[attributeName].constraints[constraint];
@@ -162,9 +157,16 @@
 
                                         args.unshift(value);
 
-                                        var validation = asbConstraints[constraint].apply(null, args);
+                                        var validation;
 
-                                        if(!validation) {
+                                        try {
+                                            validation = asbConstraints[constraint].apply(null, args);
+                                        } catch(error) {
+                                            $log.error('Exception thrown on applying validation constraint [' +  constraint + ']: ' + error);
+                                            validation = false;
+                                        }
+
+                                        if (!validation) {
                                             validationErrors[constraint] = asbConstraints.getErrorMessage(constraint);
                                         }
 
@@ -206,18 +208,30 @@
                         };
 
                         for (attributeName in prototype._meta) { //SET DEFAULT VALUES FROM ANCESTORS
-                            if(!prop.attributes || (!!prop.attributes && !prop.attributes[attributeName])) {
+                            if (!prop.attributes || (!!prop.attributes && !prop.attributes[attributeName])) {
+                                var defaultValue = prototype._meta[attributeName].default ? prototype._meta[attributeName].default : null;
+
                                 this._values[attributeName] = {
-                                    value: prototype._meta[attributeName].default ? prototype._meta[attributeName].default : null
+                                    value: defaultValue,
+                                    valid: null,
+                                    validationErrors: []
                                 };
+
+                                this[attributeName] = defaultValue;
                             }
                         }
 
                         if (!!prop.attributes) { //SET DEFAULT VALUES FROM CURRENT ENTITY
                             for (attributeName in prop.attributes) {
-                                this._values[attributeName] = { //SET DEFAULT VALUE
-                                    value: !!prop.attributes[attributeName].default ? prop.attributes[attributeName].default : null
+                                var defaultValue = !!prop.attributes[attributeName].default ? prop.attributes[attributeName].default : null;
+
+                                this._values[attributeName] = {
+                                    value: defaultValue,
+                                    valid: null,
+                                    validationErrors: []
                                 };
+
+                                this[attributeName] = defaultValue;
                             }
                         }
 
