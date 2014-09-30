@@ -296,7 +296,7 @@
                 instance[constraintName + 'Message'] = message;
             };
 
-            this.getErrorMessage = function (constraintName) {
+            instance.getErrorMessage = function (constraintName) {
                 return instance[constraintName + 'Message'];
             };
 
