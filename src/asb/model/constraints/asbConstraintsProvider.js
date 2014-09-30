@@ -296,6 +296,10 @@
                 instance[constraintName + 'Message'] = message;
             };
 
+            this.getErrorMessage = function (constraintName) {
+                return instance[constraintName + 'Message'];
+            };
+
             this.$get = function () {
                 return instance;
             };
