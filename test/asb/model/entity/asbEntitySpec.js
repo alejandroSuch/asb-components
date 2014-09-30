@@ -22,7 +22,6 @@ describe('service: asbEntity', function () {
                 }
             }
         });
-        console.log('Person', Person);
 
         var person = new Person();
 
@@ -35,73 +34,108 @@ describe('service: asbEntity', function () {
             }
         });
 
-        console.log('Person2', Person2);
-
         var person2 = new Person2();
-
-        console.log('person', person);
-        dump(person);
-        dump(person.attributes);
-        console.log('person2', person2);
-        dump(person2)
-        dump(person2.attributes)
-        /*expect(person.name).toBe(null);
-        expect(person._new).toBe(true);
-        expect(person._dirty).toBe(false);*/
-
-    });
-
-    /*it('creates a new, dirty entity', function () {
-        var Person = Entity.extend('Person', {
-            name: {
-                type: 'TEXT',
-                default: null
-            }
-        });
-
-        var person = new Person();
-        var person2 = new Person();
-
-        person.name = 'Johan';
-        person2.name = 'Mark';
-
-        expect(person.name).toBe('Johan');
-        expect(person2.name).toBe('Mark');
-
-        expect(person._new).toBe(true);
+        expect(person.name).toBe(null);
         expect(person.isNew()).toBe(true);
-        expect(person2._new).toBe(true);
-        expect(person2.isNew()).toBe(true);
-
-        expect(person._dirty).toBe(true);
-        expect(person.isDirty()).toBe(true);
-        expect(person2._dirty).toBe(true);
-        expect(person2.isDirty()).toBe(true);
+        expect(person.isDirty()).toBe(false);
     });
 
-    it('creates throws an exception because of an unknown property', function () {
+    it('checks for dirty on changes', function(){
         var Person = Entity.extend('Person', {
-            name: {
-                type: 'TEXT',
-                default: null
+            attributes : {
+                name: {
+                    type: 'TEXT',
+                    default: null,
+                    constraints: {
+                        nullable: false
+                    }
+                }
             }
         });
 
         var person = new Person();
 
-        person.name = 'Johan';
-
-        expect(person.name).toBe('Johan');
-
-        var testFn = function(){
-            person.lastName = 'Cruyff';
-        };
-
-        expect(person.name).toBe('Johan');
-        expect(testFn).toThrow('Unknown property \'Cruyff\'');
-        expect(person._new).toBe(true);
+        person.name = 'John';
+        expect(person.name).toBe('John');
         expect(person.isNew()).toBe(true);
-        expect(person._dirty).toBe(true);
         expect(person.isDirty()).toBe(true);
-    });*/
+    });
+
+    it('checks the entity validation', function(){
+        var Person = Entity.extend('Person', {
+            attributes : {
+                name: {
+                    type: 'TEXT',
+                    default: null,
+                    constraints: {
+                        nullable: false
+                    }
+                }
+            }
+        });
+
+        var person = new Person();
+
+        expect(person.name).toBe(null);
+        expect(person.isValid('name')).toBe(false);
+        expect(person.isValid()).toBe(false);
+
+        person.name = 'John';
+        expect(person.isValid('name')).toBe(true);
+        expect(person.isValid()).toBe(true);
+    });
+
+    it('checks the entity inheritance and validation', function(){
+        var Person = Entity.extend('Person', {
+            attributes : {
+                name: {
+                    type: 'TEXT',
+                    default: null,
+                    constraints: {
+                        nullable: false
+                    }
+                }
+            }
+        });
+
+        var Person2 = Person.extend('Person2', {
+            attributes : {
+                lastName : {
+                    type : 'TEXT',
+                    default : null,
+                    constraints : {
+                        nullable: false,
+                        minSize: 5,
+                        maxSize: 10
+                    }
+                }
+            }
+        });
+
+        var person = new Person2();
+
+        expect(person.name).toBe(null);
+        expect(person.isValid('name')).toBe(false);
+        expect(person.isValid()).toBe(false);
+
+        person.name = 'John';
+        expect(person.isValid('name')).toBe(true);
+        expect(person.isValid()).toBe(false);
+
+        person.lastName = 'Sm';
+        expect(person.isValid('lastName')).toBe(false);
+        expect(person.isValid()).toBe(false);
+
+        person.lastName = 'Smith';
+        expect(person.isValid('lastName')).toBe(true);
+        expect(person.isValid()).toBe(true);
+
+        person.lastName = 'Smithsonian';
+        expect(person.isValid('lastName')).toBe(false);
+        expect(person.isValid()).toBe(false);
+
+        person.lastName = 'Smith';
+        expect(person.isValid('lastName')).toBe(true);
+        expect(person.isValid()).toBe(true);
+    });
 });

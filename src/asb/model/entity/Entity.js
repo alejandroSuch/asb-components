@@ -104,8 +104,7 @@
                             }
 
                             return this._values[attributeName].valid;
-                        }
-
+                        };
                     } else {
                         var metaCopy = prototype._meta;
                         prototype._meta = {};
