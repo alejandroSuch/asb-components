@@ -91,6 +91,21 @@
                         prototype.isDirty = function () {
                             return this._dirtyValues.length !== 0;
                         };
+
+                        prototype.isValid = function(attributeName) {
+                            if(!attributeName) {
+                                for(var it in this._values) {
+                                    if(!this._values[it].valid) {
+                                        return false;
+                                    }
+                                }
+
+                                return true;
+                            }
+
+                            return this._values[attributeName].valid;
+                        }
+
                     } else {
                         var metaCopy = prototype._meta;
                         prototype._meta = {};
