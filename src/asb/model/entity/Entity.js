@@ -33,6 +33,7 @@
                 // Create a new Entity that inherits from this entity
                 Entity.extend = function (entityName, prop) {
                     var _super = this.prototype;
+                    Entity.entityName = entityName;
 
                     // Instantiate a base class (but only create the instance,
                     // don't run the init constructor)
@@ -70,9 +71,8 @@
 
                         //TODO: EQUALS FUNCTION
                     }
-
-                    if (!prototype._meta) {
-                        prototype._meta = {};
+                    if (!this._meta) {
+                        Entity._meta = {};
 
                         ['id', 'dateCreated', 'lastUpdated'].forEach(function (it) {
                             prototype.__defineSetter__(it, function (value) {
@@ -106,11 +106,11 @@
                             return this._values[attributeName].valid;
                         };
                     } else {
-                        var metaCopy = prototype._meta;
-                        prototype._meta = {};
+                        var metaCopy = this._meta;
+                        Entity._meta = {};
 
                         for (var metaAttr in metaCopy) {
-                            prototype._meta[metaAttr] = metaCopy[metaAttr];
+                            Entity._meta[metaAttr] = metaCopy[metaAttr];
                         }
                     }
 
@@ -128,11 +128,11 @@
                                 throw new Error('ERROR. "' + attributeName + '" is a reserved word');
                             }
 
-                            if (!!prototype._meta[attributeName]) { //NOT AN EXISTING ATTRIBUTE
+                            if (!!Entity._meta[attributeName]) { //NOT AN EXISTING ATTRIBUTE
                                 throw new Error('Property "' + attributeName + '" already exists');
                             }
 
-                            prototype._meta[attributeName] = prop.attributes[attributeName]; //COPY ATTRIBUTE TO META
+                            Entity._meta[attributeName] = prop.attributes[attributeName]; //COPY ATTRIBUTE TO META
 
                             prototype.__defineGetter__(attributeName, function () { //GENERATE GETTER
                                 return this._values[attributeName].value;
@@ -160,8 +160,8 @@
 
                                         try {
                                             validation = asbConstraints[constraint].apply(null, args);
-                                        } catch(error) {
-                                            $log.error('Exception thrown on applying validation constraint [' +  constraint + ']: ' + error);
+                                        } catch (error) {
+                                            $log.error('Exception thrown on applying validation constraint [' + constraint + ']: ' + error);
                                             validation = false;
                                         }
 
@@ -206,9 +206,9 @@
                             }
                         };
 
-                        for (attributeName in prototype._meta) { //SET DEFAULT VALUES FROM ANCESTORS
+                        for (attributeName in Entity._meta) { //SET DEFAULT VALUES FROM ANCESTORS
                             if (!prop.attributes || (!!prop.attributes && !prop.attributes[attributeName])) {
-                                var defaultValue = prototype._meta[attributeName].default ? prototype._meta[attributeName].default : null;
+                                var defaultValue = Entity._meta[attributeName].default ? Entity._meta[attributeName].default : null;
 
                                 this._values[attributeName] = {
                                     value: defaultValue,
