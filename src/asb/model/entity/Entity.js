@@ -149,13 +149,19 @@
 
                         this._values = {
                             id: {
-                                value: UUID.createUUID()
+                                value: UUID.createUUID(),
+                                valid: true,
+                                validationErrors: []
                             },
                             dateCreated: {
-                                value: new Date()
+                                value: new Date(),
+                                valid: true,
+                                validationErrors: []
                             },
                             lastUpdated: {
-                                value: new Date()
+                                value: new Date(),
+                                valid: true,
+                                validationErrors: []
                             }
                         };
 
