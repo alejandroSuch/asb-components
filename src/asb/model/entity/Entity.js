@@ -134,8 +134,33 @@
                                     this._dirtyValues.push(attributeName);
                                 }
 
+                                var isValid = true;
+                                var validationErrors = {};
+
+                                if(!!prop.attributes[attributeName].constraints) {
+                                    for(var constraint in prop.attributes[attributeName].constraints) {
+                                        if(!(prop.attributes[attributeName].constraints[constraint] instanceof Array)){
+                                            args = [prop.attributes[attributeName].constraints[constraint]]
+                                        } else {
+                                            args = prop.attributes[attributeName].constraints[constraint];
+                                        }
+
+                                        args.unshift(value);
+
+                                        var validation = asbConstraints[constraint].apply(null, args);
+
+                                        if(!validation) {
+                                            validationErrors[constraint] = asbConstraints.getErrorMessage(constraint);
+                                        }
+
+                                        isValid = isValid && validation;
+                                    }
+                                }
+
                                 this._values.lastUpdated.value = new Date();
                                 this._values[attributeName].value = value;
+                                this._values[attributeName].valid = isValid;
+                                this._values[attributeName].validationErrors = validationErrors;
 
                                 //TODO: Check validity
                             });
